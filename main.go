@@ -1,11 +1,11 @@
 package main
 
 import (
-	"log"
-
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"log"
+	"yy-im/pkg/auth"
 
 	"yy-im/logic"
 )
@@ -17,6 +17,8 @@ func main() {
 	router.Use(gin.Logger()).Use(sessions.Sessions("mysession", store))
 
 	router.LoadHTMLGlob("templates/*")
+
+	router.Use(auth.Auth)
 
 	router.GET("/ws", logic.WsHandle)
 

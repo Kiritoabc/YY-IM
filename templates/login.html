@@ -74,11 +74,10 @@
             .then(data => {
                 if (data.code === 0) { // 假设0表示成功
                     alert('登录成功');
-                    // 将用户信息存储在 localStorage 中
-                    // alert(data.userName)
-                    localStorage.setItem('username', data.userName);
-                    localStorage.setItem('userId', data.userID);
-                    localStorage.setItem('sessionId',data.sessionId)
+                    // 将用户信息存储在 sessionStorage 中
+                    sessionStorage.setItem('username', data.userName);
+                    sessionStorage.setItem('userId', data.userID);
+                    sessionStorage.setItem('sessionId', data.sessionId);
                     // 重定向到 websockets.html
                     window.location.href = '/websockets';
                 } else {

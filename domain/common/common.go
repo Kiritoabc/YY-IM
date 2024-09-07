@@ -17,6 +17,7 @@ type LoginResp struct {
 // SocketMsg socket消息
 type SocketMsg struct {
 	Action       string `json:"action"`
+	UserId       int    `json:"userId"`
 	TargetUserId int    `json:"targetUserId"`
 	Message      string `json:"message"`
 }

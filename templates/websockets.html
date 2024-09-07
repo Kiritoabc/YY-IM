@@ -83,9 +83,10 @@
 </div>
 
 <script>
-    // 从 localStorage 中获取用户信息
-    const username = localStorage.getItem('username');
-    const userId = localStorage.getItem('userId');
+    // 从 sessionStorage 中获取用户信息
+    const username = sessionStorage.getItem('username');
+    const userId = sessionStorage.getItem('userId');
+    const sessionId = sessionStorage.getItem('sessionId');
 
     // 展示用户信息
     document.getElementById('username').textContent = username;
@@ -144,7 +145,11 @@
     connectToServer();
 
     // 获取所有用户信息并展示在列表中
-    fetch(`http://localhost:80/user/all?userId=${userId}`)
+    fetch(`http://localhost:80/user/all?userId=${userId}`, {
+        headers: {
+            'X-Session-ID': sessionId
+        }
+    })
         .then(response => response.json())
         .then(data => {
             const userListElement = document.getElementById('usersList');

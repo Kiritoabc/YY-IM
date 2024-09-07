@@ -26,7 +26,8 @@ func Login(ctx *gin.Context) {
 	// session
 	session := sessions.Default(ctx)
 	sessionId := uuid.New().String()
-
+	// 先删除，再保存，防止多次登录，目前不设置登出
+	session.Delete(u.ID)
 	session.Set(sessionId, u.ID)
 	err := session.Save()
 	if err != nil {
