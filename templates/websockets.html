@@ -172,7 +172,7 @@
         if (event.key === 'Enter') {
             const message = document.getElementById('chatInput').value.trim();
             if (message !== '') {
-                socket.send(JSON.stringify({ action: 'sendMsg', targetUserId: currentTargetUserId, message: message }));
+                socket.send(JSON.stringify({ action: 'sendMsg', userId: userId,targetUserId: currentTargetUserId, message: message }));
                 document.getElementById('chatInput').value = '';
                 const li = document.createElement('li');
                 li.textContent = `发送消息: ${message}`;

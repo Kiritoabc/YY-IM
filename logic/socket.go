@@ -33,7 +33,10 @@ func WsHandle(ctx *gin.Context) {
 		}
 		socketMsg := common.SocketMsg{}
 		err = json.Unmarshal(msg, &socketMsg)
-
+		if err != nil {
+			fmt.Printf("json.Unmarshal error: %s\n", err)
+		}
+		fmt.Println(socketMsg)
 		switch socketMsg.Action {
 		case "sendMsg":
 			// 发送消息
@@ -43,10 +46,9 @@ func WsHandle(ctx *gin.Context) {
 			}
 
 		default:
-			fmt.Printf("unknown action: %s\n", msg)
+			fmt.Printf("unknown action: %s\n", socketMsg.Action)
 		}
-		fmt.Printf("messageType: %d\n", messageType)
-		fmt.Printf("received: %s\n", string(msg))
+		fmt.Printf("消息类型 %d", messageType)
 	}
 
 }

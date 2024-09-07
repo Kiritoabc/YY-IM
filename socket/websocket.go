@@ -37,7 +37,7 @@ func SendMsg(ctx context.Context, msg common.SocketMsg) (error, bool) {
 		// todo: 暂时其他用户未登录时，不存储消息
 		return errors.New("其他用户未登录"), false
 	}
-	if err := conn.WriteMessage(websocket.TextMessage, []byte(msg.Message)); err != nil {
+	if err := conn.WriteJSON(msg); err != nil {
 		return err, false
 	}
 	return nil, true

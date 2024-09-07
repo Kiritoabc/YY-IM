@@ -11,7 +11,7 @@ var whitelist = []string{
 	"/",
 	"/login",
 	"/websockets",
-	//"/ws",
+	"/ws",
 }
 
 // Auth 中间件
