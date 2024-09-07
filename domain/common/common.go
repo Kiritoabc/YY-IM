@@ -8,7 +8,15 @@ type LoginReq struct {
 
 // LoginResp  登录响应
 type LoginResp struct {
+	Code      int    `json:"code"`
 	UserID    int    `json:"userID"`
 	UserName  string `json:"userName"`
 	SessionId string `json:"sessionId"`
+}
+
+// SocketMsg socket消息
+type SocketMsg struct {
+	Action       string `json:"action"`
+	TargetUserId int    `json:"targetUserId"`
+	Message      string `json:"message"`
 }

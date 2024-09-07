@@ -1,12 +1,14 @@
 package main
 
 import (
+	"log"
+
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
-	"log"
+	"github.com/gin-gonic/gin"
+
 	"yy-im/logic"
 )
-import "github.com/gin-gonic/gin"
 
 func main() {
 	router := gin.Default()
@@ -15,11 +17,17 @@ func main() {
 	router.Use(gin.Logger()).Use(sessions.Sessions("mysession", store))
 
 	router.LoadHTMLGlob("templates/*")
-	// 发送到具体用户
-	router.GET("/send", logic.SendHandle)
-	// 发送到所有人
-	router.GET("/echo", logic.EchoHandle)
 
-	router.GET("/login", logic.Login)
+	router.GET("/ws", logic.WsHandle)
+
+	router.POST("/login", logic.Login)
+	router.GET("/user/all", logic.GetAllUser)
+
+	router.GET("/websockets", func(ctx *gin.Context) {
+		ctx.HTML(200, "websockets.html", nil)
+	})
+	router.GET("/", func(ctx *gin.Context) {
+		ctx.HTML(200, "login.html", nil)
+	})
 	log.Fatal(router.Run(":80"))
 }

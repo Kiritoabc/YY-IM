@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket 页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .info-box {
+            width: 300px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            width: 300px;
+        }
+        li {
+            padding: 5px 0;
+            cursor: pointer;
+        }
+        .chat-box {
+            width: 300px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        .chat-input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            box-sizing: border-box;
+        }
+        .chat-container {
+            display: flex;
+            justify-content: space-between;
+            width: 90%;
+        }
+        .chat-container > div {
+            flex: 1;
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="info-box">
+    <h2>欢迎</h2>
+    <p>用户名: <span id="username"></span></p>
+    <p>用户ID: <span id="userId"></span></p>
+</div>
+
+<div class="chat-container">
+    <div class="chat-box" id="usersListBox">
+        <h2>当前系统中的所有用户</h2>
+        <ul id="usersList"></ul>
+    </div>
+    <div class="chat-box" id="chatBox">
+        <h2>聊天窗口</h2>
+        <ul id="chatMessages"></ul>
+        <input type="text" id="chatInput" class="chat-input" placeholder="输入消息...">
+    </div>
+    <div class="chat-box" id="receivedMessagesBox">
+        <h2>接收的消息</h2>
+        <ul id="receivedMessages"></ul>
+    </div>
+</div>
+
+<script>
+    // 从 localStorage 中获取用户信息
+    const username = localStorage.getItem('username');
+    const userId = localStorage.getItem('userId');
+
+    // 展示用户信息
+    document.getElementById('username').textContent = username;
+    document.getElementById('userId').textContent = userId;
+
+    let currentTargetUserId = null;
+    let socket = null;
+
+    // 建立 WebSocket 连接
+    function connectToServer() {
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            return; // 如果已经连接，则不重复连接
+        }
+
+        socket = new WebSocket(`ws://localhost:80/ws?userId=${userId}`);
+
+        socket.onopen = () => {
+            console.log('WebSocket 连接已打开');
+        };
+
+        socket.onmessage = (event) => {
+            const message = event.data;
+            const li = document.createElement('li');
+            li.textContent = `收到消息: ${message}`;
+            document.getElementById('receivedMessages').appendChild(li);
+        };
+
+        socket.onerror = (error) => {
+            console.error('WebSocket 错误:', error);
+        };
+
+        socket.onclose = () => {
+            console.log('WebSocket 连接已关闭');
+        };
+    }
+
+    // 切换 WebSocket 连接的目标用户
+    function connectToUser(targetUserId) {
+        if (currentTargetUserId === targetUserId) {
+            return; // 如果已经是同一个目标用户，则不重复切换
+        }
+
+        currentTargetUserId = targetUserId;
+
+        // 发送切换目标用户的消息
+        socket.send(JSON.stringify({ action: 'switch_target', targetUserId: targetUserId }));
+
+        // 清空聊天记录
+        document.getElementById('chatMessages').innerHTML = '';
+
+        // 显示当前聊天对象
+        document.getElementById('chatBox').querySelector('h2').textContent = `聊天窗口 - 用户ID: ${targetUserId}`;
+    }
+
+    // 初始化 WebSocket 连接
+    connectToServer();
+
+    // 获取所有用户信息并展示在列表中
+    fetch(`http://localhost:80/user/all?userId=${userId}`)
+        .then(response => response.json())
+        .then(data => {
+            const userListElement = document.getElementById('usersList');
+            data.forEach(user => {
+                const li = document.createElement('li');
+                li.textContent = `${user.name} (ID: ${user.id})`;
+                li.addEventListener('click', () => {
+                    connectToUser(user.id);
+                });
+                userListElement.appendChild(li);
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('获取用户信息时发生错误，请稍后再试');
+        });
+
+    // 监听输入框变化
+    document.getElementById('chatInput').addEventListener('keyup', (event) => {
+        if (event.key === 'Enter') {
+            const message = document.getElementById('chatInput').value.trim();
+            if (message !== '') {
+                socket.send(JSON.stringify({ action: 'sendMsg', targetUserId: currentTargetUserId, message: message }));
+                document.getElementById('chatInput').value = '';
+                const li = document.createElement('li');
+                li.textContent = `发送消息: ${message}`;
+                document.getElementById('chatMessages').appendChild(li);
+            }
+        }
+    });
+</script>
+</body>
+</html>
